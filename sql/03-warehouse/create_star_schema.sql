@@ -1,14 +1,10 @@
--- ============================================================
 -- WAREHOUSE LAYER: Star Schema for Analytics
 -- Optimized for analytical queries with denormalized dimensions
--- ============================================================
 
 DROP SCHEMA IF EXISTS warehouse CASCADE;
 CREATE SCHEMA warehouse;
 
--- -----------------------------------------------
 -- DIMENSION: Date (generated for time-series analytics)
--- -----------------------------------------------
 CREATE TABLE warehouse.dim_date (
     date_key        DATE PRIMARY KEY,
     day_of_week     VARCHAR(10),
@@ -37,9 +33,7 @@ SELECT
     'Q' || EXTRACT(QUARTER FROM d)::TEXT || '-' || EXTRACT(YEAR FROM d)::TEXT AS fiscal_quarter
 FROM GENERATE_SERIES('2025-01-01'::DATE, '2027-12-31'::DATE, '1 day'::INTERVAL) d;
 
--- -----------------------------------------------
 -- DIMENSION: Platform
--- -----------------------------------------------
 CREATE TABLE warehouse.dim_platform (
     platform_key    SERIAL PRIMARY KEY,
     platform_name   VARCHAR(50) NOT NULL UNIQUE,
@@ -54,9 +48,7 @@ INSERT INTO warehouse.dim_platform (platform_name, platform_type, avg_cpm) VALUE
 ('Twitch', 'Live Streaming', 8.50),
 ('Twitter', 'Microblog', 6.00);
 
--- -----------------------------------------------
 -- DIMENSION: Brand
--- -----------------------------------------------
 CREATE TABLE warehouse.dim_brand (
     brand_key       SERIAL PRIMARY KEY,
     brand_id        INT UNIQUE NOT NULL,
@@ -67,9 +59,7 @@ CREATE TABLE warehouse.dim_brand (
     budget_tier     VARCHAR(20)  -- derived
 );
 
--- -----------------------------------------------
 -- DIMENSION: Creator
--- -----------------------------------------------
 CREATE TABLE warehouse.dim_creator (
     creator_key     SERIAL PRIMARY KEY,
     creator_id      INT UNIQUE NOT NULL,
@@ -83,9 +73,7 @@ CREATE TABLE warehouse.dim_creator (
     creator_tier    VARCHAR(20)
 );
 
--- -----------------------------------------------
 -- DIMENSION: Campaign
--- -----------------------------------------------
 CREATE TABLE warehouse.dim_campaign (
     campaign_key    SERIAL PRIMARY KEY,
     campaign_id     INT UNIQUE NOT NULL,
@@ -99,9 +87,7 @@ CREATE TABLE warehouse.dim_campaign (
     status          VARCHAR(20)
 );
 
--- -----------------------------------------------
 -- FACT: Campaign Performance (grain: campaign-creator-date-platform)
--- -----------------------------------------------
 CREATE TABLE warehouse.fact_campaign_performance (
     performance_key SERIAL PRIMARY KEY,
     campaign_key    INT REFERENCES warehouse.dim_campaign(campaign_key),
